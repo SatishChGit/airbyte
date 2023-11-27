@@ -36,7 +36,7 @@ async def run_connector_build(context: ConnectorContext, build_platforms: List[d
 
 
 async def run_connector_build_pipeline(
-    context: ConnectorContext, semaphore: anyio.Semaphore, build_platforms: List[dagger.Platform]
+    context: ConnectorContext, semaphore: anyio.Semaphore, build_platforms: List[dagger.Platform], image_tag: str
 ) -> ConnectorReport:
     """Run a build pipeline for a single connector.
 
@@ -44,6 +44,7 @@ async def run_connector_build_pipeline(
         context (ConnectorContext): The initialized connector context.
         semaphore (anyio.Semaphore): The semaphore to use to limit the number of concurrent builds.
         build_platforms (List[dagger.Platform]): The platforms for which to build the connector.
+        image_tag (str): The tag to use for the built image.
     Returns:
         ConnectorReport: The reports holding builds results.
     """
@@ -54,7 +55,7 @@ async def run_connector_build_pipeline(
             per_platform_built_containers = build_result.output_artifact
             step_results.append(build_result)
             if context.is_local and build_result.status is StepStatus.SUCCESS:
-                load_image_result = await LoadContainerToLocalDockerHost(context, per_platform_built_containers).run()
+                load_image_result = await LoadContainerToLocalDockerHost(context, per_platform_built_containers, image_tag).run()
                 step_results.append(load_image_result)
             context.report = ConnectorReport(context, step_results, name="BUILD RESULTS")
         return context.report

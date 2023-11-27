@@ -30,8 +30,15 @@ from pipelines.consts import BUILD_PLATFORMS, LOCAL_BUILD_PLATFORM
     default=[LOCAL_BUILD_PLATFORM],
     type=click.Choice(BUILD_PLATFORMS, case_sensitive=True),
 )
+@click.option(
+    "-t",
+    "--tag",
+    help="The tag to use for the built image.",
+    default="dev",
+    type=str,
+)
 @click.pass_context
-async def build(ctx: click.Context, use_host_gradle_dist_tar: bool, build_architectures: List[str]) -> bool:
+async def build(ctx: click.Context, use_host_gradle_dist_tar: bool, build_architectures: List[str], tag: str) -> bool:
     """Runs a build pipeline for the selected connectors."""
     build_platforms = [dagger.Platform(architecture) for architecture in build_architectures]
     connectors_contexts = [
@@ -67,6 +74,7 @@ async def build(ctx: click.Context, use_host_gradle_dist_tar: bool, build_archit
         ctx.obj["dagger_logs_path"],
         ctx.obj["execute_timeout"],
         build_platforms,
+        tag,
     )
 
     return True
