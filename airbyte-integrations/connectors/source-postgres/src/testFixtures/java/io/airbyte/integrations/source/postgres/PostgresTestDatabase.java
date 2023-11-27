@@ -20,6 +20,7 @@ public class PostgresTestDatabase extends
     TestDatabase<PostgreSQLContainer<?>, PostgresTestDatabase, PostgresTestDatabase.PostgresConfigBuilder> {
 
   public static enum PostgresBaseImage {
+
     POSTGRES_16_BULLSEYE("postgres:16-bullseye"),
     POSTGRES_12_BULLSEYE("postgres:12-bullseye"),
     POSTGRES_16_ALPINE("postgres:16-alpine"),
@@ -28,6 +29,7 @@ public class PostgresTestDatabase extends
     ;
 
     private final String imageName;
+
     PostgresBaseImage(String imageName) {
       this.imageName = imageName;
     };
