@@ -284,7 +284,7 @@ async def export_containers_to_tarball(
     Returns:
         Tuple[Optional[File], Optional[Path]]: A tuple with the file object holding the tar archive on the host and its path.
     """
-    tar_file_name = f"{slugify(context.connector.technical_name)}_{context.git_revision}.tar"
+    tar_file_name = f"{slugify(context.connector.technical_name)}_{context.git_revision}.tar" if tar_file_name is None else tar_file_name
     local_path = Path(f"{context.host_image_export_dir_path}/{tar_file_name}")
     export_success = await context.dagger_client.container().export(
         str(local_path), platform_variants=container_variants, forced_compression=ImageLayerCompression.Gzip
