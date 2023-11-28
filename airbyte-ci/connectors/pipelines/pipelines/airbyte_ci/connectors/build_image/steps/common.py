@@ -74,19 +74,25 @@ class LoadContainerToLocalDockerHost(Step):
     async def _run(self) -> StepResult:
         container_variants = list(self.containers.values())
         _, exported_tar_path = await export_containers_to_tarball(self.context, container_variants)
-        client = docker.from_env()
+        if not exported_tar_path:
+            return StepResult(
+                self,
+                StepStatus.FAILURE,
+                stderr=f"Failed to export the connector image {self.image_name}:{self.IMAGE_TAG} to a tarball.",
+            )
         try:
+            client = docker.from_env()
             response = client.api.import_image_from_file(str(exported_tar_path), repository=self.image_name, tag=self.IMAGE_TAG)
             try:
                 image_sha = json.loads(response)["status"]
-            except KeyError:
+            except (json.JSONDecodeError, KeyError):
                 return StepResult(
                     self,
                     StepStatus.FAILURE,
-                    stderr=f"Failed to load image {self.image_name}:{self.IMAGE_TAG} to your Docker host: {response}",
+                    stderr=f"Failed to import the connector image {self.image_name}:{self.IMAGE_TAG} to your Docker host: {response}",
                 )
             return StepResult(
                 self, StepStatus.SUCCESS, stdout=f"Loaded image {self.image_name}:{self.IMAGE_TAG} to your Docker host ({image_sha})."
             )
-        except ConnectionError:
-            return StepResult(self, StepStatus.FAILURE, stderr="The connection to the local docker host failed.")
+        except docker.errors.DockerException as e:
+            return StepResult(self, StepStatus.FAILURE, stderr=f"Something went wrong while interacting with the local docker client: {e}")
