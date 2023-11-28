@@ -17,5 +17,11 @@ tools.airbyte-ci.clean: ## Clean airbyte-ci installations
 
 tools.install: tools.airbyte-ci.install tools.airbyte-ci.check
 
+format.check: tools.install
+	airbyte-ci format check all
+	
+format.fix: tools.install
+	airbyte-ci format fix all
+
 .PHONY: tools.install tools.airbyte-ci.install tools.airbyte-ci-dev.install tools.airbyte-ci.check tools.airbyte-ci.clean
 
